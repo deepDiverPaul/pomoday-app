@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { fetch } from '@tauri-apps/plugin-http';
 import { computed, onMounted, ref } from 'vue';
-import { Task, TaskStatus } from '../types.ts';
+import { useTasks } from '../composables/useTasks.ts';
+import { TaskStatus } from '../types.ts';
 import { PhCaretDown, PhCaretUp, PhCheckSquare, PhDotsThree, PhPlay, PhSquare } from '@phosphor-icons/vue';
 
-const rawTasks = ref<Task[]>([]);
+const { tasks, fetchTasks } = useTasks();
 
 onMounted(async () => {
-  rawTasks.value = await fetch('https://automation.deep-node.de/webhook/e5880167-9322-4d7b-8a38-e06bae8a7734/list', { method: 'GET', headers: { 'Content-Type': 'application/json'} })
-      .then(response => response.json())
-      .then((data: { tasks: Task[] }) => rawTasks.value = data.tasks ?? [])
-      .catch(() => []);
+  await fetchTasks();
 })
 
-const visibleTasks = computed(() => rawTasks.value.filter(task => !task.archived))
+const visibleTasks = computed(() => tasks.value.filter(task => !task.archived))
 
 const categorizedTasks = computed(() => visibleTasks.value.reduce((acc, task) => {
   const tag = task.tag ?? 'Uncategorized';

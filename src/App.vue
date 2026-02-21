@@ -10,11 +10,7 @@ const currentPath = computed(() => router.currentRoute.value.path);
   <div class="overflow-hidden">
 
     <main class="pb-40 overflow-y-scroll h-screen">
-      <RouterView v-slot="{ Component }">
-        <Transition name="fade">
-          <component :is="Component" />
-        </Transition>
-      </RouterView>
+      <RouterView />
     </main>
     <div class="dock dock-xl bg-neutral-400">
       <RouterLink to="/create" :class="currentPath === '/create' ? 'dock-active' : ''">
