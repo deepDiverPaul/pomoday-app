@@ -16,6 +16,7 @@ export function useStore() {
     console.log('setValue',key,value);
     const store = await getStore();
     await store.set(key, value);
+    await store.save();
   };
 
   const getValue = async <T>(key: string) => {
