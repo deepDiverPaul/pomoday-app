@@ -12,7 +12,7 @@ const currentPath = computed(() => router.currentRoute.value.path);
     <main class="pb-40 overflow-y-scroll h-screen">
       <RouterView />
     </main>
-    <div class="dock dock-xl bg-neutral-400">
+    <div class="dock dock-xl inset-shadow-sm">
       <RouterLink to="/create" :class="currentPath === '/create' ? 'dock-active' : ''">
         <PhCheckSquareOffset :size="32" />
       </RouterLink>

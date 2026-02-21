@@ -1,3 +1,4 @@
+
 export enum TaskStatus {
   NONE,
   DONE,
@@ -5,6 +6,7 @@ export enum TaskStatus {
   WAIT,
   FLAG,
 }
+
 
 export type Worklog = {
   start: number;
@@ -17,9 +19,9 @@ export type Task = {
   "tag": string,
   "title": string,
   "status": TaskStatus,
-  "lastaction": number,
+  "lastaction": number | null,
   "logs": Worklog[],
-  "dueDate": number,
+  "dueDate": number | null,
   "id_": number,
   "id": number
 }

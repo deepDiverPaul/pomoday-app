@@ -15,8 +15,7 @@ export function useTasks() {
     isLoading.value = true;
     error.value = null;
     try {
-      const response = await api.get('e5880167-9322-4d7b-8a38-e06bae8a7734/list');
-      const data = await response.json();
+      const data = await api.get('e5880167-9322-4d7b-8a38-e06bae8a7734/list').then((res) => res.json());
       tasks.value = data.tasks ?? [];
     } catch (e: any) {
       error.value = e.message || 'Failed to fetch tasks';
@@ -45,15 +44,10 @@ export function useTasks() {
         archived: false,
       };
 
-      await api.put('e5880167-9322-4d7b-8a38-e06bae8a7734/list', { tasks: [newTask] });
-
-      // Update local store (optimistic update or refetch)
-      // Since it's a PUT to '.../list' with {tasks: [task]}, it seems to add/update?
-      // Based on CreateScreen.vue, it just navigates back.
-      // To keep store in sync without full refetch, we could add it locally if we knew the full structure
-      // But maybe it's safer to refetch or at least push to local state if we have the full object.
-      // Let's refetch to be sure it's in sync with server.
-      await fetchTasks(true);
+      const data = await api.put('e5880167-9322-4d7b-8a38-e06bae8a7734/list', { tasks: [newTask] }).then((res) => res.json());
+      if (data.tasks) {
+        tasks.value = data.tasks;
+      }
     } catch (e: any) {
       error.value = e.message || 'Failed to create task';
       console.error('Error creating task:', e);
@@ -63,11 +57,30 @@ export function useTasks() {
     }
   };
 
+  const updateTask = async (task: Task) => {
+    console.log('updateTask',task);
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const data = await api.put('e5880167-9322-4d7b-8a38-e06bae8a7734/list', { tasks: [task] }).then((res) => res.json());
+      if (data.tasks) {
+        tasks.value = data.tasks;
+      }
+    } catch (e: any) {
+      error.value = e.message || 'Failed to update task';
+      console.error('Error updating task:', e);
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     tasks,
     isLoading,
     error,
     fetchTasks,
     createTask,
+    updateTask,
   };
 }

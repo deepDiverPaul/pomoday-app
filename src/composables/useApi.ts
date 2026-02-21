@@ -51,10 +51,10 @@ export function useApi() {
   const get = (endpoint: string, options: RequestInit = {}) =>
     apiFetch(endpoint, { ...options, method: 'GET' });
 
-  const post = (endpoint: string, body: BodyInit | null, options: RequestInit = {}) =>
+  const post = (endpoint: string, body: unknown, options: RequestInit = {}) =>
     apiFetch(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
 
-  const put = (endpoint: string, body: BodyInit | null, options: RequestInit = {}) =>
+  const put = (endpoint: string, body: unknown, options: RequestInit = {}) =>
     apiFetch(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) });
 
   return {

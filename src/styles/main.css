@@ -43,8 +43,16 @@
 .fade-leave-active {
     transition: opacity 0.25s ease;
 }
-
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.xExpand-enter-active,
+.xExpand-leave-active {
+    transition: all 0.5s ease-in-out;
+}
+.xExpand-enter-from,
+.xExpand-leave-to {
+    transform: scaleX(0);
 }

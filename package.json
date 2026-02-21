@@ -21,8 +21,12 @@
     "@tauri-apps/plugin-http": "~2.5.7",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-store": "~2.4.2",
+    "@types/luxon": "^3.7.1",
+    "@vueuse/core": "^14.2.1",
     "daisyui": "^5.5.18",
     "jsencrypt": "^3.5.4",
+    "luxon": "^3.7.2",
+    "uuid": "^13.0.0",
     "vue": "^3.5.28",
     "vue-router": "^4.6.4"
   },

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useTasks } from '../composables/useTasks.ts';
-import { TaskStatus } from '../types.ts';
-import { PhCaretDown, PhCaretUp, PhCheckSquare, PhDotsThree, PhPlay, PhSquare } from '@phosphor-icons/vue';
+
+import { Task } from '../types.ts';
+import { PhCaretDown, PhCaretUp } from '@phosphor-icons/vue';
+import TodoItem from '../components/TodoItem.vue';
 
 const { tasks, fetchTasks } = useTasks();
 
@@ -10,7 +12,7 @@ onMounted(async () => {
   await fetchTasks();
 })
 
-const visibleTasks = computed(() => tasks.value.filter(task => !task.archived))
+const visibleTasks = computed<Task[]>(() => tasks.value.filter(task => !task.archived))
 
 const categorizedTasks = computed(() => visibleTasks.value.reduce((acc, task) => {
   const tag = task.tag ?? 'Uncategorized';
@@ -39,23 +41,7 @@ const collapsed = ref<string[]>([]);
       </div>
       <Transition name="fade">
         <ul v-if="!collapsed.includes(category)" class="list bg-base-100 rounded-box" >
-          <li class="list-row"  v-for="task in tasks" :key="task.id">
-            <div class="flex items-center justify-center">
-              <PhSquare v-if="task.status === TaskStatus.WAIT" :size="20" />
-              <PhCheckSquare v-else-if="task.status === TaskStatus.DONE" :size="20" weight="fill" class="text-success" />
-              <PhSquare v-else-if="task.status === TaskStatus.FLAG" :size="20" weight="fill" class="text-warning" />
-              <PhPlay v-else-if="task.status === TaskStatus.WIP" :size="20" weight="fill" class="text-info" />
-            </div>
-            <div class="flex items-center gap-2">
-              <div>{{task.title}}</div>
-
-            </div>
-            <button class="btn btn-square btn-ghost btn-sm">
-              <PhDotsThree :size="24" weight="regular" />
-            </button>
-          </li>
-
-
+            <TodoItem v-for="task in tasks.sort((a, b) => a.id_ - b.id_)" :key="task.id" :task />
         </ul>
       </Transition>
     </div>

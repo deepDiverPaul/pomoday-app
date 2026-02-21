@@ -27,7 +27,7 @@ export function useSettings() {
     let password = readSettings.password ?? '';
     if (password) {
       try {
-        password = decrypt(password);
+        password = decrypt(password) as string;
       } catch (error) {
         console.warn('Failed to decrypt stored password:', error);
       }
@@ -41,7 +41,7 @@ export function useSettings() {
 
   const saveSettings = async () => {
     const encryptedPassword = settings.value.password
-      ? encrypt(settings.value.password)
+      ? encrypt(settings.value.password) as string
       : '';
 
     await setValue<Settings>('settings', {
