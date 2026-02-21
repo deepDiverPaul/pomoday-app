@@ -10,8 +10,17 @@
     "opener:default",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://*.deep-node.de" }],
-      "deny": [{ "url": "https://private.tauri.app" }]
-    }
+      "allow": [
+        {
+          "url": "https://*.deep-node.de"
+        }
+      ],
+      "deny": [
+        {
+          "url": "https://private.tauri.app"
+        }
+      ]
+    },
+    "store:default"
   ]
 }
