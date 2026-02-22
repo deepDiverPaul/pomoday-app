@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { PhCheckSquareOffset, PhListChecks, PhSliders } from '@phosphor-icons/vue';
-import { useRouter } from 'vue-router';
-import { computed } from 'vue';
-const router = useRouter();
-const currentPath = computed(() => router.currentRoute.value.path);
+import { PhCheckSquareOffset, PhListChecks, PhSliders } from '@phosphor-icons/vue'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTasks } from './composables/useTasks.ts'
+
+const { fetchTasks } = useTasks()
+const router = useRouter()
+const currentPath = computed(() => router.currentRoute.value.path)
+onMounted(fetchTasks)
 </script>
 
 <template>
   <div class="overflow-hidden">
-
     <main class="pb-40 overflow-y-scroll h-screen">
       <RouterView />
     </main>
@@ -26,5 +29,4 @@ const currentPath = computed(() => router.currentRoute.value.path);
       </RouterLink>
     </div>
   </div>
-
 </template>
