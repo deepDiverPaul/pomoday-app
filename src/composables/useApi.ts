@@ -1,4 +1,3 @@
-import { fetch } from '@tauri-apps/plugin-http';
 import { useStore } from './useStore.ts';
 import { useCrypto } from './useCrypto.ts';
 
@@ -8,6 +7,9 @@ type Settings = {
   username: string;
   password: string;
 };
+
+const isTauri = () =>
+  typeof window !== 'undefined' && Boolean((window as typeof window & { __TAURI__?: unknown }).__TAURI__);
 
 async function buildAuthHeader(): Promise<string | undefined> {
   const {decrypt} = useCrypto();
@@ -36,10 +38,15 @@ export function useApi() {
       ...options.headers,
     } as Record<string, string>;
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const response = isTauri()
+      ? await (await import('@tauri-apps/plugin-http')).fetch(url, {
+          ...options,
+          headers,
+        })
+      : await fetch(url, {
+          ...options,
+          headers,
+        });
 
     if (!response.ok) {
       throw new Error(`API call failed: ${response.statusText}`);
