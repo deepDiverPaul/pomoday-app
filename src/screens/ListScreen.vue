@@ -14,12 +14,7 @@ onMounted(async () => {
 
 const visibleTasks = computed<Task[]>(() => tasks.value.filter(task => !task.archived))
 
-const categorizedTasks = computed(() => visibleTasks.value.reduce((acc, task) => {
-  const tag = task.tag ?? 'Uncategorized';
-  acc[tag] = acc[tag] ?? [];
-  acc[tag].push(task);
-  return acc;
-}, {} as Record<string, Task[]>))
+const categorizedTasks = computed(() => visibleTasks.value.reduce())
 
 const collapsed = ref<string[]>([]);
 

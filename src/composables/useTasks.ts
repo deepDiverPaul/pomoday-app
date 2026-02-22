@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { useApi } from './useApi.ts';
 import { Task } from '../types.ts';
+import { useArrayReduce, useArrayUnique } from '@vueuse/core'
 
 const tasks = ref<Task[]>([]);
 const isLoading = ref(false);
@@ -75,6 +76,15 @@ export function useTasks() {
     }
   }
 
+  const tasksByCategory = useArrayReduce(tasks.value.sort((a,b) => a.id_ - b.id_), (acc, task) => {
+    const tag = task.tag ?? 'Uncategorized';
+    acc[tag] = acc[tag] ?? [];
+    acc[tag].push(task);
+    return acc;
+  }, {} as Record<string, Task[]>)
+
+  const categories = useArrayUnique(Object.keys(tasksByCategory.value))
+
   return {
     tasks,
     isLoading,
@@ -82,5 +92,6 @@ export function useTasks() {
     fetchTasks,
     createTask,
     updateTask,
+    categories,
   };
 }

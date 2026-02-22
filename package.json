@@ -13,7 +13,7 @@
     "build:ios": "tauri ios build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "format": "biome format --write"
+    "format": "eslint format --write"
   },
   "dependencies": {
     "@phosphor-icons/vue": "^2.2.1",
@@ -31,7 +31,6 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.2",
     "@tailwindcss/vite": "^4.2.0",
     "@tauri-apps/cli": "^2",
     "@vitejs/plugin-vue": "^6.0.4",
