@@ -2,13 +2,10 @@
 import type { Task } from '../types.ts'
 import { PhCheckSquare, PhFlag, PhPlay, PhSquare } from '@phosphor-icons/vue'
 import { DateTime } from 'luxon'
-import { computed, ref } from 'vue'
-import { useTasks } from '../composables/useTasks.ts'
+import { computed } from 'vue'
 import { TaskStatus } from '../types.ts'
 
 const { task } = defineProps<{ task: Task }>()
-
-const { updateTask } = useTasks()
 
 const dueColor = computed(() => {
   const dueDiff = task.dueDate ? DateTime.fromMillis(task.dueDate).diffNow('days').days : undefined
@@ -27,13 +24,6 @@ const dueColor = computed(() => {
     return 'text-neutral'
   }
 })
-
-const statusSelectVisible = ref(false)
-
-async function handleClick(update: Partial<Task>) {
-  updateTask({ ...task, ...update })
-  statusSelectVisible.value = false
-}
 </script>
 
 <template>

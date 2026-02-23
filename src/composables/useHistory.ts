@@ -15,7 +15,6 @@ export default function useHistory() {
   onMounted(async () => {
     store.value = await getValue('history') || []
     resetHistoryIndex()
-    console.log({ s: store.value })
   })
 
   const pushHistory = (item: string) => {

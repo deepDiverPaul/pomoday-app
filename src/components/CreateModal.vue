@@ -5,7 +5,7 @@ import { useTemplateRef } from 'vue'
 import { useTasks } from '../composables/useTasks.ts'
 import { router } from '../router.ts'
 
-const { createTask, tasks } = useTasks()
+const { createTask } = useTasks()
 
 async function handleSubmit(e: Event) {
   const data = new FormData(e.target as HTMLFormElement)
