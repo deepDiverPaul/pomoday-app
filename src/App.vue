@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import CreateInput from './components/CreateInput.vue'
 import CreateModal from './components/CreateModal.vue'
 
+import SettingsModal from './components/SettingsModal.vue'
 import { useTasks } from './composables/useTasks.ts'
 
 const isMobile = useMediaQuery('(pointer: coarse)')
@@ -24,5 +25,6 @@ onMounted(fetchTasks)
       <CreateModal v-if="isMobile" />
       <CreateInput v-else />
     </template>
+    <SettingsModal />
   </div>
 </template>
