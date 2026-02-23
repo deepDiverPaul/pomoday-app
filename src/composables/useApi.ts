@@ -1,42 +1,43 @@
-import { useStore } from './useStore.ts';
-import { useCrypto } from './useCrypto.ts';
+import { useCrypto } from './useCrypto.ts'
+import { useStore } from './useStore.ts'
 
-const BASE_URL = 'https://automation.deep-node.de/webhook';
+const BASE_URL = 'https://automation.deep-node.de/webhook'
 
-type Settings = {
-  username: string;
-  password: string;
-};
+interface Settings {
+  username: string
+  password: string
+}
 
-const isTauri = () =>
-  typeof window !== 'undefined' && Boolean((window as typeof window & { __TAURI__?: unknown }).__TAURI__);
+function isTauri() {
+  return typeof window !== 'undefined' && Boolean((window as typeof window & { __TAURI__?: unknown }).__TAURI__)
+}
 
 async function buildAuthHeader(): Promise<string | undefined> {
-  const {decrypt} = useCrypto();
-  const { getValue } = useStore();
-  const settings = await getValue<Settings>('settings');
-  if (!settings) return undefined;
-  let {username, password} = settings;
-  password = decrypt(password) as string;
+  const { decrypt } = useCrypto()
+  const { getValue } = useStore()
+  const settings = await getValue<Settings>('settings')
+  if (!settings)
+    return undefined
+  let { username, password } = settings
+  password = decrypt(password) as string
 
   if (username && password) {
-    const token = btoa(`${username}:${password}`);
-    return `Basic ${token}`;
+    const token = btoa(`${username}:${password}`)
+    return `Basic ${token}`
   }
-  return undefined;
+  return undefined
 }
 
 export function useApi() {
   const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}/${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}/${endpoint}`
 
-    const authHeader = await buildAuthHeader();
-    console.log('authHeader',authHeader);
+    const authHeader = await buildAuthHeader()
     const headers = {
       'Content-Type': 'application/json',
       ...(authHeader ? { Authorization: authHeader } : {}),
       ...options.headers,
-    } as Record<string, string>;
+    } as Record<string, string>
 
     const response = isTauri()
       ? await (await import('@tauri-apps/plugin-http')).fetch(url, {
@@ -46,28 +47,28 @@ export function useApi() {
       : await fetch(url, {
           ...options,
           headers,
-        });
+        })
 
     if (!response.ok) {
-      throw new Error(`API call failed: ${response.statusText}`);
+      throw new Error(`API call failed: ${response.statusText}`)
     }
 
-    return response;
-  };
+    return response
+  }
 
   const get = (endpoint: string, options: RequestInit = {}) =>
-    apiFetch(endpoint, { ...options, method: 'GET' });
+    apiFetch(endpoint, { ...options, method: 'GET' })
 
   const post = (endpoint: string, body: unknown, options: RequestInit = {}) =>
-    apiFetch(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
+    apiFetch(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) })
 
   const put = (endpoint: string, body: unknown, options: RequestInit = {}) =>
-    apiFetch(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) });
+    apiFetch(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) })
 
   return {
     get,
     post,
     put,
     fetch: apiFetch,
-  };
+  }
 }

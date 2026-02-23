@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Task } from '../types.ts'
-import { PhCheckSquare, PhDotsThree, PhFlag, PhPause, PhPlay, PhSquare, PhX } from '@phosphor-icons/vue'
+import { PhCheckSquare, PhFlag, PhPlay, PhSquare } from '@phosphor-icons/vue'
 import { DateTime } from 'luxon'
 import { computed, ref } from 'vue'
 import { useTasks } from '../composables/useTasks.ts'
@@ -37,48 +37,20 @@ async function handleClick(update: Partial<Task>) {
 </script>
 
 <template>
-  <li class="list-row">
-    <div class="flex items-center justify-center">
-      <button class="btn btn-square btn-ghost" @click="statusSelectVisible = !statusSelectVisible">
-        <PhX v-if="statusSelectVisible" :size="20" />
-        <template v-else>
-          <PhSquare v-if="task.status === TaskStatus.WAIT" :size="20" />
-          <PhCheckSquare v-else-if="task.status === TaskStatus.DONE" :size="20" weight="fill" class="text-success" />
-          <PhFlag v-else-if="task.status === TaskStatus.FLAG" :size="20" weight="fill" class="text-warning" />
-          <PhPlay v-else-if="task.status === TaskStatus.WIP" :size="20" weight="fill" class="text-info" />
-        </template>
-      </button>
-      <Transition>
-        <div v-if="statusSelectVisible" class="">
-          <template v-if="task.status !== TaskStatus.WIP">
-            <button v-if="task.status !== TaskStatus.DONE" class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.DONE })">
-              <PhCheckSquare :size="24" weight="regular" class="text-success" />
-            </button>
-            <button v-if="task.status !== TaskStatus.WAIT" class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.WAIT })">
-              <PhSquare :size="24" weight="regular" />
-            </button>
-            <button v-if="task.status !== TaskStatus.FLAG" class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.FLAG })">
-              <PhFlag :size="24" weight="fill" class="text-warning" />
-            </button>
-            <button class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.WIP })">
-              <PhPlay :size="24" weight="fill" class="text-info" />
-            </button>
-          </template>
-          <button v-else class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.WAIT })">
-            <PhPause :size="24" weight="fill" class="text-info" />
-          </button>
-        </div>
-      </Transition>
-    </div>
-    <div class="flex flex-col justify-center">
-      <div>{{ task.id_ }} {{ task.title }}</div>
-      <div v-if="task.dueDate" :class="dueColor">
-        {{ DateTime.fromMillis(task.dueDate).toFormat('dd/MM/yyyy') }}
+  <li class="">
+    <div class="font-mono text-sm flex flex-row justify-start gap-4">
+      <span>{{ String(task.id_).padStart(3, '&nbsp;') }}</span>
+      <div class="flex items-center justify-center">
+        <PhSquare v-if="task.status === TaskStatus.WAIT" :size="16" />
+        <PhCheckSquare v-else-if="task.status === TaskStatus.DONE" :size="16" weight="fill" class="text-success" />
+        <PhFlag v-else-if="task.status === TaskStatus.FLAG" :size="16" weight="fill" class="text-warning" />
+        <PhPlay v-else-if="task.status === TaskStatus.WIP" :size="16" weight="fill" class="text-info" />
       </div>
+      <span>{{ task.title }}</span>
+      <span v-if="task.dueDate" :class="dueColor">
+        {{ DateTime.fromMillis(task.dueDate).toFormat('dd/MM/yyyy') }}
+      </span>
     </div>
-    <button class="btn btn-square btn-ghost">
-      <PhDotsThree :size="24" weight="regular" />
-    </button>
   </li>
 </template>
 

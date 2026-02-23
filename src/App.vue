@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { PhCheckSquareOffset, PhListChecks, PhSliders } from '@phosphor-icons/vue'
+import { useMediaQuery } from '@vueuse/core'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import CreateInput from './components/CreateInput.vue'
+import CreateModal from './components/CreateModal.vue'
+
 import { useTasks } from './composables/useTasks.ts'
+
+const isMobile = useMediaQuery('(pointer: coarse)')
 
 const { fetchTasks } = useTasks()
 const router = useRouter()
@@ -11,22 +16,13 @@ onMounted(fetchTasks)
 </script>
 
 <template>
-  <div class="overflow-hidden">
-    <main class="pb-40 overflow-y-scroll h-screen">
+  <div>
+    <main class="h-screen overflow-y-auto">
       <RouterView />
     </main>
-    <div class="dock dock-xl inset-shadow-sm">
-      <RouterLink to="/create" :class="currentPath === '/create' ? 'dock-active' : ''">
-        <PhCheckSquareOffset :size="32" />
-      </RouterLink>
-
-      <RouterLink to="/" :class="currentPath === '/' ? 'dock-active' : ''">
-        <PhListChecks :size="32" />
-      </RouterLink>
-
-      <RouterLink to="/settings" :class="currentPath === '/settings' ? 'dock-active' : ''">
-        <PhSliders :size="32" />
-      </RouterLink>
-    </div>
+    <template v-if="currentPath === '/'">
+      <CreateModal v-if="isMobile" />
+      <CreateInput v-else />
+    </template>
   </div>
 </template>
