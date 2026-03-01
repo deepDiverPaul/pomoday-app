@@ -12,6 +12,7 @@
     "build:desktop": "tauri build",
     "build:ios": "tauri ios build",
     "preview": "vite preview",
+    "start": "vite serve --host",
     "tauri": "tauri",
     "format": "eslint format --write"
   },
