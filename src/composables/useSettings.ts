@@ -1,63 +1,67 @@
-import { ref, watch } from 'vue';
-import { useStore } from './useStore.ts';
-import { useCrypto } from './useCrypto.ts';
+import { ref, watch } from 'vue'
+import { useCrypto } from './useCrypto.ts'
+import { useStore } from './useStore.ts'
 
-export type Settings = {
-  username: string,
-  password: string,
+export interface Settings {
+  username: string
+  password: string
+  todayShown: boolean
 }
 
 const settingsDefault: Settings = {
   username: '',
   password: '',
-};
+  todayShown: false,
+}
+const settings = ref<Settings>({ ...settingsDefault })
 
 export function useSettings() {
-  const { setValue, getValue } = useStore();
-  const { encrypt, decrypt } = useCrypto();
-  const settings = ref<Settings>({ ...settingsDefault });
+  const { setValue, getValue } = useStore()
+  const { encrypt, decrypt } = useCrypto()
 
   const loadSettings = async () => {
-    const readSettings = await getValue<Settings>('settings');
+    const readSettings = await getValue<Settings>('settings')
     if (!readSettings) {
-      settings.value = { ...settingsDefault };
-      return;
+      settings.value = { ...settingsDefault }
+      return
     }
 
-    let password = readSettings.password ?? '';
+    let password = readSettings.password ?? ''
     if (password) {
       try {
-        password = decrypt(password) as string;
-      } catch (error) {
-        console.warn('Failed to decrypt stored password:', error);
+        password = decrypt(password) as string
+      }
+      catch (error) {
+        console.warn('Failed to decrypt stored password:', error)
       }
     }
 
     settings.value = {
-      username: readSettings.username ?? '',
+      ...settingsDefault,
+      ...readSettings,
       password,
-    };
-  };
+    }
+  }
 
   const saveSettings = async () => {
     const encryptedPassword = settings.value.password
       ? encrypt(settings.value.password) as string
-      : '';
+      : ''
 
     await setValue<Settings>('settings', {
-      username: settings.value.username,
+      ...settings.value,
       password: encryptedPassword,
-    });
-  };
+    })
+  }
 
   watch(settings, () => {
-    void saveSettings();
-  }, { deep: true });
+    void saveSettings()
+  }, { deep: true })
 
-  void loadSettings();
+  void loadSettings()
 
   return {
     settings,
     loadSettings,
-  };
+  }
 }

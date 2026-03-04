@@ -3,9 +3,7 @@ import { PhX } from '@phosphor-icons/vue'
 import { onKeyStroke, useMagicKeys, whenever } from '@vueuse/core'
 
 import { useTemplateRef } from 'vue'
-import { useSettings } from '../composables/useSettings.ts'
-
-const { settings } = useSettings()
+import SettingsForm from './forms/SettingsForm.vue'
 
 const settingsModal = useTemplateRef('settingsModal')
 
@@ -26,26 +24,16 @@ onKeyStroke('Escape', (e) => {
 <template>
   <div>
     <dialog ref="settingsModal" class="modal">
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
       <div class="modal-box">
         <form method="dialog">
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
             <PhX size="24" />
           </button>
         </form>
-        <form @submit.prevent>
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">
-              Username
-            </legend>
-            <input v-model="settings.username" type="text" class="input" name="username">
-          </fieldset>
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">
-              Password
-            </legend>
-            <input v-model="settings.password" type="text" class="input" name="password">
-          </fieldset>
-        </form>
+        <SettingsForm />
       </div>
     </dialog>
   </div>

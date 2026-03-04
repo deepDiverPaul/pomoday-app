@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import type { UseSwipeDirection } from '@vueuse/core'
 import type { Task } from '../types.ts'
-import { PhCheckSquare, PhDotsThree, PhFlag, PhPause, PhPlay, PhSquare, PhX } from '@phosphor-icons/vue'
+import { PhCheckSquare, PhClockCountdown, PhFlag, PhPause, PhPlay, PhSquare, PhTrash } from '@phosphor-icons/vue'
+import { onClickOutside, useSwipe } from '@vueuse/core'
 import { DateTime } from 'luxon'
-import { computed, ref } from 'vue'
-import { useTasks } from '../composables/useTasks.ts'
+import { computed, shallowRef, useTemplateRef } from 'vue'
+import useActions from '../composables/useActions.ts'
 import { TaskStatus } from '../types.ts'
 
 const { task } = defineProps<{ task: Task }>()
 
-const { updateTask } = useTasks()
+const { run } = useActions()
 
 const dueColor = computed(() => {
   const dueDiff = task.dueDate ? DateTime.fromMillis(task.dueDate).diffNow('days').days : undefined
@@ -28,57 +30,90 @@ const dueColor = computed(() => {
   }
 })
 
-const statusSelectVisible = ref(false)
+const target = useTemplateRef('target')
+const container = useTemplateRef('container')
+const containerWidth = computed(() => container.value?.offsetWidth)
+const left = shallowRef('0')
+const opacity = shallowRef(1)
 
-async function handleClick(update: Partial<Task>) {
-  updateTask({ ...task, ...update })
-  statusSelectVisible.value = false
+function reset() {
+  left.value = '0'
+  opacity.value = 1
 }
+const { isSwiping, lengthX } = useSwipe(
+  target,
+  {
+    passive: false,
+    onSwipe(_e: TouchEvent) {
+      if (containerWidth.value) {
+        if (lengthX.value < 0) {
+          const length = Math.abs(lengthX.value)
+          left.value = `${length}px`
+          opacity.value = 1.1 - length / containerWidth.value
+        }
+        else {
+          left.value = '0'
+          opacity.value = 1
+        }
+      }
+    },
+    onSwipeEnd(_e: TouchEvent, _direction: UseSwipeDirection) {
+      if (lengthX.value < 0 && containerWidth.value && (Math.abs(lengthX.value) / containerWidth.value) >= 0.5) {
+        left.value = '100%'
+        opacity.value = 0
+      }
+      else {
+        left.value = '0'
+        opacity.value = 1
+      }
+    },
+  },
+)
+async function handleClick(command: string) {
+  await run(command)
+  reset()
+}
+
+onClickOutside(container, reset)
 </script>
 
 <template>
-  <li class="list-row">
-    <div class="flex items-center justify-center">
-      <button class="btn btn-square btn-ghost" @click="statusSelectVisible = !statusSelectVisible">
-        <PhX v-if="statusSelectVisible" :size="20" />
-        <template v-else>
-          <PhSquare v-if="task.status === TaskStatus.WAIT" :size="20" />
-          <PhCheckSquare v-else-if="task.status === TaskStatus.DONE" :size="20" weight="fill" class="text-success" />
-          <PhFlag v-else-if="task.status === TaskStatus.FLAG" :size="20" weight="fill" class="text-warning" />
-          <PhPlay v-else-if="task.status === TaskStatus.WIP" :size="20" weight="fill" class="text-info" />
-        </template>
+  <li ref="container" class="badge badge-xl badge-neutral badge-outline w-full h-auto py-2 select-none relative overflow-hidden">
+    <div class=" flex flex-row justify-start gap-2 w-full">
+      <template v-if="task.status !== TaskStatus.WIP">
+        <button class="btn btn-square btn-ghost" @click="handleClick(`check ${task.id_}`)">
+          <PhCheckSquare v-if="task.status !== TaskStatus.DONE" :size="30" class="text-success" /><PhSquare v-else :size="30" />
+        </button>
+        <button v-if="task.status !== TaskStatus.FLAG" class="btn btn-square btn-ghost" @click="handleClick(`flag ${task.id_}`)">
+          <PhFlag :size="30" weight="fill" class="text-warning" />
+        </button>
+        <button class="btn btn-square btn-ghost" @click="handleClick(`start ${task.id_}`)">
+          <PhPlay :size="30" weight="fill" class="text-info" />
+        </button>
+      </template>
+      <button v-else class="btn btn-square btn-ghost" @click="handleClick(`stop ${task.id_}`)">
+        <PhPause :size="30" weight="fill" class="text-info" />
       </button>
-      <Transition>
-        <div v-if="statusSelectVisible" class="">
-          <template v-if="task.status !== TaskStatus.WIP">
-            <button v-if="task.status !== TaskStatus.DONE" class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.DONE })">
-              <PhCheckSquare :size="24" weight="regular" class="text-success" />
-            </button>
-            <button v-if="task.status !== TaskStatus.WAIT" class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.WAIT })">
-              <PhSquare :size="24" weight="regular" />
-            </button>
-            <button v-if="task.status !== TaskStatus.FLAG" class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.FLAG })">
-              <PhFlag :size="24" weight="fill" class="text-warning" />
-            </button>
-            <button class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.WIP })">
-              <PhPlay :size="24" weight="fill" class="text-info" />
-            </button>
-          </template>
-          <button v-else class="btn btn-square btn-ghost" @click="handleClick({ status: TaskStatus.WAIT })">
-            <PhPause :size="24" weight="fill" class="text-info" />
-          </button>
-        </div>
-      </Transition>
-    </div>
-    <div class="flex flex-col justify-center">
-      <div>{{ task.id }} {{ task.id_ }} {{ task.title }}</div>
-      <div v-if="task.dueDate" :class="dueColor">
-        {{ DateTime.fromMillis(task.dueDate).toFormat('dd/MM/yyyy') }}
+      <div class="grow flex justify-end">
+        <button class="btn btn-square btn-ghost" @click="handleClick(`delete ${task.id_}`)">
+          <PhTrash :size="30" weight="fill" class="text-error" />
+        </button>
       </div>
     </div>
-    <button class="btn btn-square btn-ghost">
-      <PhDotsThree :size="24" weight="regular" />
-    </button>
+    <div ref="target" :class="{ 'transition-all': !isSwiping }" :style="{ left, opacity }" class="top-0 left-0 w-full h-full absolute rounded bg-white font-mono text-md font-semibold flex flex-row justify-start items-center gap-2 min-h-10 px-2">
+      <div class="flex items-center justify-center">
+        <PhSquare v-if="task.status === TaskStatus.WAIT" :size="30" />
+        <PhCheckSquare v-else-if="task.status === TaskStatus.DONE" :size="30" weight="fill" class="text-success" />
+        <PhFlag v-else-if="task.status === TaskStatus.FLAG" :size="30" weight="fill" class="text-warning" />
+        <PhPlay v-else-if="task.status === TaskStatus.WIP" :size="30" weight="fill" class="text-info" />
+      </div>
+      <div class="grow">
+        {{ task.title }}
+      </div>
+      <div v-if="task.dueDate" :class="dueColor" class="text-right">
+        <PhClockCountdown :size="30" :weight="dueColor === 'text-error' ? 'fill' : 'regular'" />
+      </div>
+    </div>
   </li>
 </template>
 

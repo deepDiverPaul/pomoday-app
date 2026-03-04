@@ -1,13 +1,12 @@
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from './useStore.ts'
 
+const store = ref<string[]>([])
+const historyIndex = ref(0)
+
 export default function useHistory() {
   const { getValue, setValue } = useStore()
-
-  const store = ref<string[]>([])
   const history = computed<string[]>(() => store.value)
-
-  const historyIndex = ref(0)
 
   const resetHistoryIndex = () => {
     historyIndex.value = store.value.length - 1

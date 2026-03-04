@@ -3,8 +3,8 @@ import { useMediaQuery } from '@vueuse/core'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CreateInput from './components/CreateInput.vue'
-import CreateModal from './components/CreateModal.vue'
 
+import MobileActions from './components/MobileActions.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import { useTasks } from './composables/useTasks.ts'
 
@@ -18,13 +18,17 @@ onMounted(fetchTasks)
 
 <template>
   <div>
-    <main class="h-screen overflow-y-auto">
+    <main class="h-screen overflow-y-auto overflow-x-none w-screen max-w-screen border-t-2 border-primary">
       <RouterView />
     </main>
     <template v-if="currentPath === '/'">
-      <CreateModal v-if="isMobile" />
-      <CreateInput v-else />
+      <template v-if="isMobile">
+        <MobileActions />
+      </template>
+      <template v-else>
+        <CreateInput />
+        <SettingsModal />
+      </template>
     </template>
-    <SettingsModal />
   </div>
 </template>

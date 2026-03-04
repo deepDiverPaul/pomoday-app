@@ -15,11 +15,13 @@ import {
   tagRenameCommand,
 } from '../utils/actions.ts'
 import { parseCommand } from '../utils/parser.ts'
+import { useSettings } from './useSettings.ts'
 import { useTasks } from './useTasks.ts'
 
 export default function useActions() {
   const { tasks: tasksOriginal, createTask, updateTask } = useTasks()
-  const run = (value: string) => {
+  const { settings } = useSettings()
+  const run = async (value: string) => {
     const cmd = parseCommand(value)
     let tasksToUpdate: Task[] = []
     let taskToCreate: Pick<Task, 'tag' | 'title' | 'dueDate'> | null = null
@@ -81,10 +83,9 @@ export default function useActions() {
         case 'tagrename':
           tasksToUpdate = tagRenameCommand(cmd, tasks)
           break
-        /* Visibility */
-        // case 'hide':
-        //   updateCandidate = hideCommand(updateCandidate, cmd)
-        //   break
+        case 'today':
+          settings.value.todayShown = !settings.value.todayShown
+          break
         // case 'show':
         //   updateCandidate = showCommand(updateCandidate, cmd)
         //   break
@@ -97,12 +98,11 @@ export default function useActions() {
         //   break
       }
     }
-    // console.log(tasksToUpdate, taskToCreate)
     if (tasksToUpdate) {
-      updateTask(tasksToUpdate)
+      await updateTask(tasksToUpdate)
     }
     if (taskToCreate) {
-      createTask(taskToCreate)
+      await createTask(taskToCreate)
     }
   }
   return { run }

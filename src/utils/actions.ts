@@ -92,7 +92,6 @@ export function flagCommand(tasks: Task[], ids: Task['id_'][]) {
     t.status
       = t.status === TaskStatus.FLAG ? TaskStatus.WAIT : TaskStatus.FLAG
     t = stopWorkLogging(t)
-
     return t
   })
 }

@@ -10,7 +10,6 @@ const error = ref<string | null>(null)
 
 export function useTasks() {
   const api = useApi()
-
   const fetchTasks = async (force = false) => {
     if (tasks.value.length > 0 && !force)
       return
