@@ -1,12 +1,12 @@
 import type { Task } from '../types.ts'
 import { useArrayUnique } from '@vueuse/core'
 import { ref } from 'vue'
-import { TaskStatus } from '../types.ts'
 import { useApi } from './useApi.ts'
 
 const tasks = ref<Task[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+const endpoint = '/items/pomodays'
 
 export function useTasks() {
   const api = useApi()
@@ -17,7 +17,7 @@ export function useTasks() {
     isLoading.value = true
     error.value = null
     try {
-      const data = await api.get('e5880167-9322-4d7b-8a38-e06bae8a7734/list').then(res => res.json())
+      const data = await api.get(`${endpoint}?limit=-1`).then(res => res.json())
       tasks.value = data.tasks ?? []
     }
     catch (e: any) {
@@ -29,29 +29,12 @@ export function useTasks() {
     }
   }
 
-  const createTask = async (taskData: Pick<Task, 'title' | 'dueDate' | 'tag'>) => {
-    // Get next ID as per current logic in CreateScreen.vue
-    const nextId = () => tasks.value.sort((a, b) => a.id_ - b.id_).reduce((acc, task) => {
-      if (task.id_ === acc + 1)
-        return acc + 1
-      return acc
-    }, 0) + 1
+  const createTask = async (taskData: Pick<Task, 'title' | 'due_date' | 'tag'>) => {
     isLoading.value = true
     error.value = null
     try {
-      const newTask: Omit<Task, 'id'> = {
-        id_: nextId(),
-        status: TaskStatus.WAIT,
-        logs: [],
-        lastaction: Date.now(),
-        archived: false,
-        ...taskData,
-      }
-
-      const data = await api.put('e5880167-9322-4d7b-8a38-e06bae8a7734/list', { tasks: [newTask] }).then(res => res.json())
-      if (data.tasks) {
-        tasks.value = data.tasks
-      }
+      await api.post(endpoint, { ...taskData }).then(res => res.json())
+      await fetchTasks()
     }
     catch (e: any) {
       error.value = e.message || 'Failed to create task'
@@ -63,15 +46,29 @@ export function useTasks() {
     }
   }
 
-  const updateTask = async (task: Task | Task[]) => {
+  const updateTask = async (task: Task) => {
     isLoading.value = true
     error.value = null
-    const tasksToUpdate = (Array.isArray(task) ? task : [task]).map(t => ({ ...t, lastaction: Date.now() } as Task))
     try {
-      const data = await api.put('e5880167-9322-4d7b-8a38-e06bae8a7734/list', { tasks: tasksToUpdate }).then(res => res.json())
-      if (data.tasks) {
-        tasks.value = data.tasks
-      }
+      await api.patch(`${endpoint}/${task.id}`, task).then(res => res.json())
+      await fetchTasks()
+    }
+    catch (e: any) {
+      error.value = e.message || 'Failed to update task'
+      console.error('Error updating task:', e)
+      throw e
+    }
+    finally {
+      isLoading.value = false
+    }
+  }
+
+  const updateTasks = async (data: Partial<Task>, keys: Task['id'][]) => {
+    isLoading.value = true
+    error.value = null
+    try {
+      await api.patch(`${endpoint}`, { data, keys }).then(res => res.json())
+      await fetchTasks()
     }
     catch (e: any) {
       error.value = e.message || 'Failed to update task'
@@ -92,6 +89,7 @@ export function useTasks() {
     fetchTasks,
     createTask,
     updateTask,
+    updateTasks,
     categories,
   }
 }

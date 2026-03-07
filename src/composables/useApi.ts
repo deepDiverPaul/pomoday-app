@@ -1,12 +1,8 @@
+import type { Settings } from './useSettings.ts'
 import { useCrypto } from './useCrypto.ts'
 import { useStore } from './useStore.ts'
 
-const BASE_URL = 'https://automation.deep-node.de/webhook'
-
-interface Settings {
-  username: string
-  password: string
-}
+const BASE_URL = import.meta.env.VITE_API_URL
 
 function isTauri() {
   return typeof window !== 'undefined' && Boolean((window as typeof window & { __TAURI__?: unknown }).__TAURI__)
@@ -18,19 +14,18 @@ async function buildAuthHeader(): Promise<string | undefined> {
   const settings = await getValue<Settings>('settings')
   if (!settings)
     return undefined
-  let { username, password } = settings
-  password = decrypt(password) as string
+  let { accessKey } = settings
+  accessKey = decrypt(accessKey) as string
 
-  if (username && password) {
-    const token = btoa(`${username}:${password}`)
-    return `Basic ${token}`
+  if (accessKey) {
+    return `Bearer ${accessKey}`
   }
   return undefined
 }
 
 export function useApi() {
   const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}/${endpoint}`
+    const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`
 
     const authHeader = await buildAuthHeader()
     const headers = {
@@ -62,13 +57,13 @@ export function useApi() {
   const post = (endpoint: string, body: unknown, options: RequestInit = {}) =>
     apiFetch(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) })
 
-  const put = (endpoint: string, body: unknown, options: RequestInit = {}) =>
-    apiFetch(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) })
+  const patch = (endpoint: string, body: unknown, options: RequestInit = {}) =>
+    apiFetch(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(body) })
 
   return {
     get,
     post,
-    put,
+    patch,
     fetch: apiFetch,
   }
 }

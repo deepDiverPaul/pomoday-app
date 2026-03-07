@@ -1,24 +1,23 @@
 export enum TaskStatus {
-  NONE,
-  DONE,
-  WIP,
-  WAIT,
-  FLAG,
+  ARCHIVE = 'archive',
+  DONE = 'done',
+  WIP = 'wip',
+  WAIT = 'wait',
+  FLAG = 'flag',
 }
 
 export interface Worklog {
-  start: number
+  start: string
   end: number
 }
 
 export interface Task {
-  archived: boolean
   tag: string
   title: string
   status: TaskStatus
-  lastaction: number | null
-  logs: Worklog[]
-  dueDate: number | null
+  lastaction: string | null
+  logs: Worklog[] | null
+  due_date: string | null
   id_: number
   id: number
 }

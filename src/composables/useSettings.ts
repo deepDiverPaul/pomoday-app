@@ -3,14 +3,12 @@ import { useCrypto } from './useCrypto.ts'
 import { useStore } from './useStore.ts'
 
 export interface Settings {
-  username: string
-  password: string
+  accessKey: string
   todayShown: boolean
 }
 
 const settingsDefault: Settings = {
-  username: '',
-  password: '',
+  accessKey: '',
   todayShown: false,
 }
 const settings = ref<Settings>({ ...settingsDefault })
@@ -26,31 +24,31 @@ export function useSettings() {
       return
     }
 
-    let password = readSettings.password ?? ''
-    if (password) {
+    let accessKey = readSettings.accessKey ?? ''
+    if (accessKey) {
       try {
-        password = decrypt(password) as string
+        accessKey = decrypt(accessKey) as string
       }
       catch (error) {
-        console.warn('Failed to decrypt stored password:', error)
+        console.warn('Failed to decrypt stored accessKey:', error)
       }
     }
 
     settings.value = {
       ...settingsDefault,
       ...readSettings,
-      password,
+      accessKey,
     }
   }
 
   const saveSettings = async () => {
-    const encryptedPassword = settings.value.password
-      ? encrypt(settings.value.password) as string
+    const encryptedPassword = settings.value.accessKey
+      ? encrypt(settings.value.accessKey) as string
       : ''
 
     await setValue<Settings>('settings', {
       ...settings.value,
-      password: encryptedPassword,
+      accessKey: encryptedPassword,
     })
   }
 
