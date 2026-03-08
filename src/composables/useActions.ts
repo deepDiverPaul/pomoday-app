@@ -19,12 +19,13 @@ import { useSettings } from './useSettings.ts'
 import { useTasks } from './useTasks.ts'
 
 export default function useActions() {
-  const { tasks: tasksOriginal, createTask, updateTask } = useTasks()
+  const { tasks: tasksOriginal, createTask, updateTask, deleteTask, fetchTasks } = useTasks()
   const { settings } = useSettings()
   const run = async (value: string) => {
     const cmd = parseCommand(value)
-    let tasksToUpdate: Task[] = []
-    let taskToCreate: Pick<Task, 'tag' | 'title' | 'dueDate'> | null = null
+    let tasksToUpdate: Task[] | null = null
+    let tasksToDelete: Task[] | null = null
+    let taskToCreate: Pick<Task, 'tag' | 'title' | 'due_date'> | null = null
     const tasks = JSON.parse(JSON.stringify(tasksOriginal.value)) as Task[]
     if (cmd) {
       const ids = cmd.id
@@ -45,7 +46,7 @@ export default function useActions() {
           break
         case 'd':
         case 'delete':
-          tasksToUpdate = deleteCommand(ids, cmd, tasks)
+          tasksToDelete = deleteCommand(ids, cmd, tasks)
           break
         case 'fl':
         case 'flag':
@@ -98,12 +99,16 @@ export default function useActions() {
         //   break
       }
     }
+    if (tasksToDelete) {
+      await deleteTask(tasksToDelete)
+    }
     if (tasksToUpdate) {
       await updateTask(tasksToUpdate)
     }
     if (taskToCreate) {
       await createTask(taskToCreate)
     }
+    await fetchTasks(true)
   }
   return { run }
 }

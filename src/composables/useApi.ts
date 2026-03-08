@@ -60,10 +60,14 @@ export function useApi() {
   const patch = (endpoint: string, body: unknown, options: RequestInit = {}) =>
     apiFetch(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(body) })
 
+  const delete_ = (endpoint: string, body: unknown, options: RequestInit = {}) =>
+    apiFetch(endpoint, { ...options, method: 'DELETE', body: JSON.stringify(body) })
+
   return {
     get,
     post,
     patch,
+    delete: delete_,
     fetch: apiFetch,
   }
 }

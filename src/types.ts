@@ -8,7 +8,7 @@ export enum TaskStatus {
 
 export interface Worklog {
   start: string
-  end: number
+  end?: string
 }
 
 export interface Task {

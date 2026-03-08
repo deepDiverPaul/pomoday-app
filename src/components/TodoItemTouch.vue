@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import type { UseSwipeDirection } from '@vueuse/core'
 import type { Task } from '../types.ts'
-import { PhCheckSquare, PhClockCountdown, PhFlag, PhPause, PhPlay, PhSquare, PhTrash } from '@phosphor-icons/vue'
+import { PhCheckSquare, PhClockCountdown, PhFlag, PhPause, PhPen, PhPlay, PhSquare, PhTrash } from '@phosphor-icons/vue'
 import { onClickOutside, useSwipe } from '@vueuse/core'
 import { DateTime } from 'luxon'
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import useActions from '../composables/useActions.ts'
 import { TaskStatus } from '../types.ts'
+import EditForm from './forms/EditForm.vue'
 
 const { task } = defineProps<{ task: Task }>()
 
 const { run } = useActions()
 
 const dueColor = computed(() => {
-  const dueDiff = task.dueDate ? DateTime.fromMillis(task.dueDate).diffNow('days').days : undefined
+  const dueDiff = task.due_date ? DateTime.fromISO(task.due_date).diffNow('days').days : undefined
   if (!dueDiff)
     return ''
   if (dueDiff < 0) {
@@ -36,8 +37,11 @@ const containerWidth = computed(() => container.value?.offsetWidth)
 const left = shallowRef('0')
 const opacity = shallowRef(1)
 
+const modalComponent = useTemplateRef('modalComponent')
+
 function reset() {
   left.value = '0'
+  modalComponent.value?.close()
   opacity.value = 1
 }
 const { isSwiping, lengthX } = useSwipe(
@@ -94,13 +98,16 @@ onClickOutside(container, reset)
       <button v-else class="btn btn-square btn-ghost" @click="handleClick(`stop ${task.id_}`)">
         <PhPause :size="30" weight="fill" class="text-info" />
       </button>
+      <button class="btn btn-square btn-ghost" @click="modalComponent?.showModal()">
+        <PhPen :size="30" weight="fill" class="text-info" />
+      </button>
       <div class="grow flex justify-end">
         <button class="btn btn-square btn-ghost" @click="handleClick(`delete ${task.id_}`)">
           <PhTrash :size="30" weight="fill" class="text-error" />
         </button>
       </div>
     </div>
-    <div ref="target" :class="{ 'transition-all': !isSwiping }" :style="{ left, opacity }" class="top-0 left-0 w-full h-full absolute rounded bg-white font-mono text-md font-semibold flex flex-row justify-start items-center gap-2 min-h-10 px-2">
+    <div ref="target" :class="{ 'transition-all': !isSwiping }" :style="{ left, opacity }" class="top-0 left-0 w-full h-full absolute bg-base-100 text-base-content font-mono text-md font-semibold flex flex-row justify-start items-center gap-2 min-h-10 px-2">
       <div class="flex items-center justify-center">
         <PhSquare v-if="task.status === TaskStatus.WAIT" :size="30" />
         <PhCheckSquare v-else-if="task.status === TaskStatus.DONE" :size="30" weight="fill" class="text-success" />
@@ -110,10 +117,18 @@ onClickOutside(container, reset)
       <div class="grow">
         {{ task.title }}
       </div>
-      <div v-if="task.dueDate" :class="dueColor" class="text-right">
+      <div v-if="task.due_date" :class="dueColor" class="text-right">
         <PhClockCountdown :size="30" :weight="dueColor === 'text-error' ? 'fill' : 'regular'" />
       </div>
     </div>
+    <dialog ref="modalComponent" class="modal">
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+      <div class="modal-box">
+        <EditForm :task="task" @update="reset" />
+      </div>
+    </dialog>
   </li>
 </template>
 

@@ -27,23 +27,23 @@ function showModal(component: ModalShown) {
   <div>
     <div class="fab select-none">
       <!-- a focusable div with tabindex is necessary to work on all browsers. role="button" is necessary for accessibility -->
-      <div tabindex="0" role="button" class="btn btn-xl btn-circle bg-white border border-black border-2">
+      <div tabindex="0" role="button" class="btn btn-xl btn-circle btn-neutral btn-outline">
         <PhDotsNine :size="30" weight="bold" />
       </div>
 
       <!-- close button should not be focusable so it can close the FAB when clicked. It's just a visual placeholder -->
       <div class="fab-close">
-        <span class="btn btn-xl btn-circle bg-white border border-black border-2"><PhX size="30" weight="bold" /></span>
+        <span class="btn btn-xl btn-circle btn-neutral btn-outline"><PhX size="30" weight="bold" /></span>
       </div>
 
       <!-- buttons that show up when FAB is open -->
       <div>
-        <button class="btn btn-xl btn-circle bg-white border border-black border-2" @click="showModal('create')">
+        <button class="btn btn-xl btn-circle btn-neutral btn-outline" @click="showModal('create')">
           <PhPlus size="30" weight="bold" />
         </button>
       </div>
       <div>
-        <button class="btn btn-xl btn-circle bg-white border border-black border-2" @click="showModal('settings')">
+        <button class="btn btn-xl btn-circle btn-neutral btn-outline" @click="showModal('settings')">
           <PhSliders :size="30" weight="bold" />
         </button>
       </div>
@@ -53,11 +53,6 @@ function showModal(component: ModalShown) {
         <button>close</button>
       </form>
       <div class="modal-box">
-        <form method="dialog">
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-            <PhX size="24" />
-          </button>
-        </form>
         <component :is="componentMap[modalShown]" v-if="modalShown" />
       </div>
     </dialog>

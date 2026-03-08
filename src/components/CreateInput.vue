@@ -120,18 +120,18 @@ watchEffect(() => {
 </script>
 
 <template>
-  <form class="flex bottom-0 right-0 left-0 top-0 justify-center items-center flex-col gap-6 transition-opacity duration-500 bg-primary/10 " :class=" inputActive ? 'fixed' : 'opacity-0' " @submit.prevent="handleSubmit">
+  <form class="flex bottom-0 right-0 left-0 top-0 justify-center items-center flex-col gap-6 transition-opacity duration-500 bg-primary/30 " :class=" inputActive ? 'fixed' : 'opacity-0' " @submit.prevent="handleSubmit">
     <div class="font-mono w-10/12 max-w-md relative h-10">
-      <div class="absolute top-0 left-0 right-0 bottom-0 bg-white px-4 py-2">
+      <div class="absolute top-0 left-0 right-0 bottom-0 bg-neutral text-neutral-content px-4 py-2">
         {{ suggestion }}
       </div>
       <input
         ref="inputComponent"
         v-model="value" type="text"
-        class="absolute top-0 left-0 right-0 bottom-0 bg-white/40 px-4 py-2 rounded-lg shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary h-full w-full"
+        class="absolute top-0 left-0 right-0 bottom-0 bg-neutral/70 text-neutral-content px-4 py-2 shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary h-full w-full"
       >
     </div>
-    <div v-if="showHelp" class="bg-white/70 backdrop-blur-xs p-6 rounded-lg shadow-xl text-center">
+    <div v-if="showHelp" class="bg-neutral/70 backdrop-blur-xs p-6 text-neutral-content shadow-xl text-center">
       <HelpPanel />
     </div>
   </form>

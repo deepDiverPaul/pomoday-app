@@ -7,6 +7,7 @@ const tasks = ref<Task[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const endpoint = '/items/pomodays'
+const refreshInterval = ref<number>()
 
 export function useTasks() {
   const api = useApi()
@@ -18,7 +19,7 @@ export function useTasks() {
     error.value = null
     try {
       const data = await api.get(`${endpoint}?limit=-1`).then(res => res.json())
-      tasks.value = data.tasks ?? []
+      tasks.value = data.data ?? []
     }
     catch (e: any) {
       error.value = e.message || 'Failed to fetch tasks'
@@ -29,12 +30,15 @@ export function useTasks() {
     }
   }
 
+  if (refreshInterval.value === undefined) {
+    refreshInterval.value = setInterval(() => fetchTasks(true), 1000 * 60)
+  }
+
   const createTask = async (taskData: Pick<Task, 'title' | 'due_date' | 'tag'>) => {
     isLoading.value = true
     error.value = null
     try {
       await api.post(endpoint, { ...taskData }).then(res => res.json())
-      await fetchTasks()
     }
     catch (e: any) {
       error.value = e.message || 'Failed to create task'
@@ -46,12 +50,14 @@ export function useTasks() {
     }
   }
 
-  const updateTask = async (task: Task) => {
+  const updateTask = async (tasks: Task | Task[]) => {
     isLoading.value = true
     error.value = null
+    const tasksToUpdate = Array.isArray(tasks) ? tasks : [tasks]
     try {
-      await api.patch(`${endpoint}/${task.id}`, task).then(res => res.json())
-      await fetchTasks()
+      for (const task of tasksToUpdate) {
+        await api.patch(`${endpoint}/${task.id}`, task)
+      }
     }
     catch (e: any) {
       error.value = e.message || 'Failed to update task'
@@ -63,12 +69,12 @@ export function useTasks() {
     }
   }
 
-  const updateTasks = async (data: Partial<Task>, keys: Task['id'][]) => {
+  const deleteTask = async (tasks: Task | Task[]) => {
     isLoading.value = true
     error.value = null
+    const taskIdsToDelete = (Array.isArray(tasks) ? tasks : [tasks]).map(task => task.id)
     try {
-      await api.patch(`${endpoint}`, { data, keys }).then(res => res.json())
-      await fetchTasks()
+      await api.delete(endpoint, taskIdsToDelete)
     }
     catch (e: any) {
       error.value = e.message || 'Failed to update task'
@@ -89,7 +95,7 @@ export function useTasks() {
     fetchTasks,
     createTask,
     updateTask,
-    updateTasks,
+    deleteTask,
     categories,
   }
 }

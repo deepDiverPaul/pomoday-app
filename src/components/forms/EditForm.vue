@@ -1,42 +1,42 @@
 <script setup lang="ts">
 import type { Task } from '../../types.ts'
-import { useTasks } from '../../composables/useTasks.ts'
+import { ref } from 'vue'
+import useActions from '../../composables/useActions.ts'
 
-const { createTask } = useTasks()
+const { task } = defineProps<{ task: Task }>()
 
+const emit = defineEmits(['update'])
+
+const localTask = ref(task)
+
+const { run } = useActions()
 async function handleSubmit(e: Event) {
-  const data = new FormData(e.target as HTMLFormElement)
-  const task = Object.fromEntries(data) as unknown as Pick<Task, 'tag' | 'title' | 'dueDate'>
-
-  await createTask(task)
+  const formData = new FormData(e.target as HTMLFormElement)
+  const data = Object.fromEntries(formData) as unknown as Pick<Task, 'tag' | 'title' | 'due_date'>
+  run(`edit ${localTask.value.id_} ${data.tag} ${data.title}`)
+  emit('update')
 }
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
+  <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
     <fieldset class="fieldset">
-      <legend class="fieldset-legend">
-        What is your name?
-      </legend>
-      <input type="text" class="input" name="title" placeholder="Type here">
+      <input v-model="localTask.title" type="text" class="input input-xl input-neutral w-full" name="title" placeholder="Task">
     </fieldset>
     <fieldset class="fieldset">
-      <legend class="fieldset-legend">
-        Category
-      </legend>
-      <select class="select" name="tag">
-        <option disabled selected value="@uncategorized">
+      <select v-model="localTask.tag" class="select select-xl select-neutral w-full" name="tag">
+        <option selected value="@uncategorized">
           @uncategorized
         </option>
         <option value="@home">
           @home
         </option>
         <option value="@work">
-          Amber
+          @work
         </option>
       </select>
     </fieldset>
-    <button class="btn btn-primary">
+    <button class="btn btn-xl btn-neutral btn-outline w-full">
       Submit
     </button>
   </form>

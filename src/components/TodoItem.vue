@@ -8,7 +8,7 @@ import { TaskStatus } from '../types.ts'
 const { task } = defineProps<{ task: Task }>()
 
 const dueColor = computed(() => {
-  const dueDiff = task.dueDate ? DateTime.fromMillis(task.dueDate).diffNow('days').days : undefined
+  const dueDiff = task.due_date ? DateTime.fromISO(task.due_date).diffNow('days').days : undefined
   if (!dueDiff)
     return ''
   if (dueDiff < 0) {
@@ -37,8 +37,8 @@ const dueColor = computed(() => {
         <PhPlay v-else-if="task.status === TaskStatus.WIP" :size="16" weight="fill" class="text-info" />
       </div>
       <span>{{ task.title }}</span>
-      <span v-if="task.dueDate" :class="dueColor">
-        {{ DateTime.fromMillis(task.dueDate).toFormat('dd/MM/yyyy') }}
+      <span v-if="task.due_date" :class="dueColor">
+        {{ DateTime.fromISO(task.due_date).toFormat('dd/MM/yyyy') }}
       </span>
     </div>
   </li>

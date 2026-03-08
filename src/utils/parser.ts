@@ -8,7 +8,7 @@ function parseTaskCommand(str: string) {
   return str.match(/^(t(?:ask)?)\s(@\S*[0-9a-z'-])?([\s\S]*)/i)
 }
 function parseEditCommand(str: string) {
-  return str.match(/^(e(?:dit)?)\s(\d+)([\s\S]*)/i)
+  return str.match(/^(e(?:dit)?)\s(\d+)\s(@\S*[0-9a-z'-])?([\s\S]*)/i)
 }
 const parseDueCommand = (str: string) => str.match(/^(due)\s(\d+)([\s\S]*)/i)
 function parseMoveCommand(str: string) {
@@ -72,7 +72,8 @@ function compileEditCommand(input: string) {
     return {
       command: matchEdit[1],
       id: matchEdit[2],
-      text: matchEdit[3].trim(),
+      tag: matchEdit[3],
+      text: matchEdit[4].trim(),
     } as Command
   }
   return null

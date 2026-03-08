@@ -6,9 +6,11 @@ import CreateInput from './components/CreateInput.vue'
 
 import MobileActions from './components/MobileActions.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import { useSettings } from './composables/useSettings.ts'
 import { useTasks } from './composables/useTasks.ts'
 
 const isMobile = useMediaQuery('(pointer: coarse)')
+const { settings } = useSettings()
 
 const { fetchTasks } = useTasks()
 const router = useRouter()
@@ -17,7 +19,7 @@ onMounted(fetchTasks)
 </script>
 
 <template>
-  <div>
+  <div :data-theme="settings.theme ?? 'default'" class="flex flex-col">
     <main class="h-screen overflow-y-auto overflow-x-none w-screen max-w-screen border-t-2 border-primary">
       <RouterView />
     </main>

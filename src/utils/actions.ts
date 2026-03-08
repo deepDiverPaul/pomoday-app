@@ -1,5 +1,6 @@
 import type { Task } from '../types.ts'
 import type { Command } from './parser.ts'
+import { DateTime } from 'luxon'
 import { TaskStatus } from '../types.ts'
 import { parseDueDate, stopWorkLogging } from './helpers.ts'
 
@@ -14,8 +15,7 @@ export function beginCommand(tasks: Task[], ids: Task['id_'][]) {
   return tasks.filter(t => ids.includes(t.id_) && t.status !== TaskStatus.WIP).map((t) => {
     t.status = TaskStatus.WIP
     t.logs = (t.logs || []).concat({
-      start: Date.now(),
-      end: 0,
+      start: DateTime.now().toUTC().toString(),
     })
     return t
   })
@@ -37,10 +37,7 @@ export function deleteCommand(ids: Task['id_'][], cmd: Command, tasks: Task[]) {
     // Delete by tag
     const tag = (cmd?.id?.match(/^(@.*)/) || []).pop()
     if (tag) {
-      return tasks.filter(t => t.tag === tag).map(t => ({
-        ...t,
-        status: TaskStatus.NONE,
-      } as Task))
+      return tasks.filter(t => t.tag === tag)
     }
     // Delete by status
     const status = (
@@ -70,20 +67,14 @@ export function deleteCommand(ids: Task['id_'][], cmd: Command, tasks: Task[]) {
           break
       }
       if (taskStatus) {
-        return tasks.filter(t => t.status === taskStatus && !t.archived).map(t => ({
-          ...t,
-          status: TaskStatus.NONE,
-        } as Task))
+        return tasks.filter(t => t.status === taskStatus)
       }
     }
     return []
   }
   else {
     // Delete by id
-    return tasks.filter(t => ids.includes(t.id_)).map(t => ({
-      ...t,
-      status: TaskStatus.NONE,
-    } as Task))
+    return tasks.filter(t => ids.includes(t.id_))
   }
 }
 
@@ -172,19 +163,19 @@ export function insertTaskCommand(cmd: Command) {
     return {
       tag,
       title: task,
-      dueDate: null,
-    } as Pick<Task, 'title' | 'dueDate' | 'tag'>
+      due_date: null,
+    } as Pick<Task, 'title' | 'due_date' | 'tag'>
   }
   return null
 }
 
 export function editTaskCommand(ids: Task['id_'][], cmd: Command, tasks: Task[]) {
   const id = ids[0]
-  const task = cmd?.text
-  if (task && task.length) {
-    return tasks.filter(t => t.id === id).map(t => ({
+  if (cmd) {
+    return tasks.filter(t => t.id_ === id).map(t => ({
       ...t,
-      title: task,
+      title: cmd.text?.length ? cmd.text : t.title,
+      tag: cmd.tag ?? t.tag,
     } as Task))
   }
 
@@ -197,10 +188,10 @@ export function dueCommand(ids: Task['id_'][], cmd: Command, tasks: Task[]) {
   if (id) {
     return tasks.filter(t => t.id_ === id).map((t: Task) => {
       if (/^(?:clear|none|remove)$/i.test(text)) {
-        t.dueDate = null
+        t.due_date = null
       }
       else if (text && text.length) {
-        t.dueDate = parseDueDate(text)
+        t.due_date = parseDueDate(text)
       }
       return t
     })

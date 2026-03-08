@@ -5,11 +5,13 @@ import { useStore } from './useStore.ts'
 export interface Settings {
   accessKey: string
   todayShown: boolean
+  theme: string
 }
 
 const settingsDefault: Settings = {
   accessKey: '',
   todayShown: false,
+  theme: 'default',
 }
 const settings = ref<Settings>({ ...settingsDefault })
 
